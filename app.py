@@ -36,15 +36,36 @@ def alle_daten_holen():
 def stadtdaten_holen():
     return database.stadtdaten_laden()
 
+@st.cache_data
+def marktdaten_holen(typ):
+    # Marktdaten für die Marktübersicht laden
+    return database.marktdaten_laden(typ=typ)
+
+
 # ── Seite 1: Preisschätzung ───────────────────────────────────────────────────
 
 def seite_preisschaetzung():
-    st.header("Immobilienpreise schätzen")
+    st.title("🏠 WertWohn")
+    st.markdown("### Schweizer Immobilienpreise einfach schätzen")
+    st.markdown("""Kennst du das? Du interessierst dich für eine Wohnung in Zürich oder Basel – 
+aber weisst nicht ob der Preis fair ist. Makler sind teuer, Vergleichsportale 
+zeigen nur Angebotspreise und niemand gibt dir eine klare Antwort.
+
+**WertWohn löst genau dieses Problem.** Unser Modell analysiert 
+den Schweizer Immobilienmarkt und liefert dir in Sekunden eine realistische 
+Preisschätzung – für Kauf und Miete, kostenlos und ohne Anmeldung.
+    """)
+    
+    col1, col2 = st.columns(2)
+    col1.metric("Städte", "10 Schweizer Städte")
+    col2.metric("Währungen", "CHF · EUR · USD")
+    
+    st.markdown("---")
 
     # ── Suche und Preistyp ────────────────────────────────────────────────────
     col_suche, col_typ = st.columns([2, 1])
     with col_suche:
-        eingabe = st.text_input("🔍 PLZ oder Stadtname eingeben", placeholder="z. B. 8001 oder Zürich")
+        eingabe = st.text_input("🔍 PLZ oder Stadtname eingeben", placeholder="z. B. 8000 oder Zürich")
     with col_typ:
         typ_wahl = st.radio("Preistyp", ["Kaufpreis", "Mietpreis"], horizontal=True)
 
@@ -66,7 +87,7 @@ def seite_preisschaetzung():
         flaeche = st.slider("Wohnfläche (m²)", 25, 300, 85)
     with col_b:
         stockwerk = st.slider("Stockwerk", 0, 15, 2)
-        baujahr = st.slider("Baujahr", 1900, 2024, 2000)
+        baujahr = st.slider("Baujahr", 1900, 2026, 2000)
     with col_c:
         parkplatz = st.checkbox("Parkplatz vorhanden", value=False)
         st.write("")
@@ -75,36 +96,41 @@ def seite_preisschaetzung():
 
     # ── Ergebnis anzeigen ─────────────────────────────────────────────────────
     typ_intern = "kauf" if typ_wahl == "Kaufpreis" else "miete"
-    preis = ml_model.schaetzen(stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, typ_intern)
 
     if berechnen:
+        preis = ml_model.schaetzen(stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, typ_intern)
         st.session_state["letzter_preis"] = preis
+    elif "letzter_preis" in st.session_state:
+        preis = st.session_state["letzter_preis"]
+    else:
+        preis = None
 
     st.markdown("---")
-    st.markdown(f"### Geschätzter {typ_bezeichnung(typ_intern)}")
 
-    col_l, col_m, col_r = st.columns([1, 2, 1])
-    with col_m:
-        st.metric(
-            label=f"{zimmer}-Zimmer-Wohnung, {flaeche} m² in {stadt}",
-            value=chf(preis),
-        )
-        if typ_intern == "kauf":
-            preis_m2 = preis / flaeche
-            st.caption(f"ca. {chf(preis_m2)} pro m²")
-        else:
-            st.caption(f"ca. {chf(preis * 12)} pro Jahr")
+    if preis is not None:
+        st.markdown(f"### Geschätzter {typ_bezeichnung(typ_intern)}")
 
-    # Gauge: Preisvergleich zum Schweizer Durchschnitt
-    daten = daten_holen(typ_intern)
-    schweizer_schnitt = daten["preis"].mean()
-    st.info(f"Schweizer Durchschnitt: {chf(schweizer_schnitt)}")
-    
-    # Wechselkurs anzeigen
-    eur_kurs, usd_kurs = data_fetcher.wechselkurs_holen()
-    st.markdown(f"**Preis in anderen Währungen:** € {preis * eur_kurs:,.0f} EUR | $ {preis * usd_kurs:,.0f} USD")
+        col_l, col_m, col_r = st.columns([1, 2, 1])
+        with col_m:
+            st.metric(
+                label=f"{zimmer}-Zimmer-Wohnung, {flaeche} m² in {stadt}",
+                value=chf(preis),
+            )
+            if typ_intern == "kauf":
+                preis_m2 = preis / flaeche
+                st.caption(f"ca. {chf(preis_m2)} pro m²")
+            else:
+                st.caption(f"ca. {chf(preis * 12)} pro Jahr")
 
+        daten = daten_holen(typ_intern)
+        schweizer_schnitt = daten["preis"].mean()
+        st.info(f"Schweizer Durchschnitt: {chf(schweizer_schnitt)}")
 
+        eur_kurs, usd_kurs = data_fetcher.wechselkurs_holen()
+        st.markdown(f"**Preis in anderen Währungen:** € {float(preis) * eur_kurs:,.0f} EUR | $ {float(preis) * usd_kurs:,.0f} USD")
+        st.caption("Wechselkurs: frankfurter.app · Live")
+    else:
+        st.info("Bitte Angaben eingeben und auf 'Preis schätzen' klicken.")
 
 # ── Seite 2: Marktübersicht ───────────────────────────────────────────────────
 
@@ -115,7 +141,7 @@ def seite_markt():
     typ_intern = "kauf" if typ_wahl == "Kaufpreise" else "miete"
     einheit = "CHF" if typ_intern == "kauf" else "CHF/Mt."
 
-    daten = daten_holen(typ_intern)
+    daten = marktdaten_holen(typ_intern)
     stadtdaten = stadtdaten_holen()
 
     # Stadtdurchschnitte für Karte und Balkendiagramm
@@ -127,31 +153,35 @@ def seite_markt():
 
     # ── Karte der Schweiz ─────────────────────────────────────────────────────
     st.subheader("Preiskarte Schweiz")
+    agg_karte = agg.copy()
+    agg_karte["groesse"] = 10
     karte = px.scatter_mapbox(
-        agg,
+        agg_karte,
         lat="lat", lon="lon",
-        size="durchschnitt",
+        size="groesse",
         color="durchschnitt",
         hover_name="stadt",
-        hover_data={"kanton": True, "durchschnitt": ":,.0f", "anzahl": True, "lat": False, "lon": False},
-        color_continuous_scale="Greens",
-        zoom=6.5, height=430, size_max=42,
+        hover_data={"kanton": True, "durchschnitt": ":,.0f", "anzahl": True, "lat": False, "lon": False, "groesse": False},
+        color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
+        zoom=6.5, height=430, size_max=40,
         labels={"durchschnitt": f"Ø {einheit}", "anzahl": "Inserate"},
     )
     karte.update_layout(mapbox_style="open-street-map", margin={"l": 0, "r": 0, "t": 0, "b": 0})
     st.plotly_chart(karte, use_container_width=True)
-
+    
     col_links, col_rechts = st.columns(2)
 
     # ── Balkendiagramm: Städtevergleich ──────────────────────────────────────
-    with col_links:
+    # ── Balkendiagramm: Städtevergleich ──────────────────────────────────────
+    col_l, col_m, col_r = st.columns([1, 3, 1])
+    with col_m:
         st.subheader("Durchschnittspreise nach Stadt")
         balken = px.bar(
             agg.sort_values("durchschnitt", ascending=True),
             x="durchschnitt", y="stadt",
             orientation="h",
             color="durchschnitt",
-            color_continuous_scale="Greens",
+            color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
             text_auto=",.0f",
             labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
         )
@@ -160,27 +190,25 @@ def seite_markt():
         st.plotly_chart(balken, use_container_width=True)
 
     # ── Scatter Plot: Fläche vs. Preis mit Trendlinie ─────────────────────────
-    with col_rechts:
-        st.subheader("Wohnfläche vs. Preis")
-        scatter = px.scatter(
-            daten, x="flaeche", y="preis",
-            color="stadt", opacity=0.55,
-            labels={"flaeche": "Wohnfläche (m²)", "preis": f"Preis ({einheit})", "stadt": "Stadt"},
-        )
-        # Trendlinie manuell berechnen (ohne externe Abhängigkeit)
-        if len(daten) > 2:
-            x_werte = daten["flaeche"].values
-            y_werte = daten["preis"].values
-            koeffizienten = np.polyfit(x_werte, y_werte, 1)
-            poly = np.poly1d(koeffizienten)
-            x_linie = np.linspace(x_werte.min(), x_werte.max(), 100)
-            scatter.add_trace(go.Scatter(
-                x=x_linie, y=poly(x_linie),
-                mode="lines", name="Trend",
-                line={"color": "#1b5e20", "width": 2, "dash": "dash"},
-            ))
-        scatter.update_layout(legend={"font": {"size": 9}})
-        st.plotly_chart(scatter, use_container_width=True)
+    st.subheader("Wohnfläche vs. Preis")
+    scatter = px.scatter(
+        daten, x="flaeche", y="preis",
+        color="stadt", opacity=0.55,
+        labels={"flaeche": "Wohnfläche (m²)", "preis": f"Preis ({einheit})", "stadt": "Stadt"},
+    )
+    if len(daten) > 2:
+        x_werte = daten["flaeche"].values
+        y_werte = daten["preis"].values
+        koeffizienten = np.polyfit(x_werte, y_werte, 1)
+        poly = np.poly1d(koeffizienten)
+        x_linie = np.linspace(x_werte.min(), x_werte.max(), 100)
+        scatter.add_trace(go.Scatter(
+            x=x_linie, y=poly(x_linie),
+            mode="lines", name="Trend",
+            line={"color": "#1b5e20", "width": 2, "dash": "dash"},
+        ))
+    scatter.update_layout(legend={"font": {"size": 20}})
+    st.plotly_chart(scatter, use_container_width=True)
 
 # ── Seite 3: Meine Immobilien ─────────────────────────────────────────────────
 
@@ -197,7 +225,7 @@ def seite_immobilien():
             zimmer = st.select_slider("Zimmer", [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0], value=3.0)
         with col2:
             stockwerk = st.number_input("Stockwerk", min_value=0, max_value=30, value=2)
-            baujahr = st.number_input("Baujahr", min_value=1850, max_value=2024, value=2000)
+            baujahr = st.number_input("Baujahr", min_value=1850, max_value=2026, value=2000)
             parkplatz = st.checkbox("Parkplatz vorhanden")
         with col3:
             typ_eingabe = st.radio("Preistyp", ["Kaufpreis", "Mietpreis"])

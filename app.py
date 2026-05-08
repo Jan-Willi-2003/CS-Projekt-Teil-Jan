@@ -205,7 +205,7 @@ def seite_markt():
 
     # ── Karte der Schweiz ─────────────────────────────────────────────────────
     st.subheader("Preiskarte Schweiz")
-    st.caption("Die Karte zeigt den durchschnittlichen Immobilienpreis pro Stadt. Dunklere Farben bedeuten höhere Preise.")
+    st.caption("Die Karte zeigt den durchschnittlichen Immobilienpreis pro Stadt. Farben im roten Bereich bedeuten höhere Preise.")
     agg_karte = agg.copy()
     agg_karte["groesse"] = 10
     karte = px.scatter_mapbox(

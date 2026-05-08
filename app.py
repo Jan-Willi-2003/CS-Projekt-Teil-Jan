@@ -296,7 +296,7 @@ def seite_markt():
     )
     linie.update_layout(legend={"font": {"size": 12}}, xaxis_tickangle=-45)
     st.plotly_chart(linie, use_container_width=True)
-    st.info(
+    st.caption(
         "Beispiel: Ein Indexwert von 150 bedeutet, "
         "dass die Immobilienpreise 50 % höher liegen als im Jahr 2000."
     )

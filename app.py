@@ -292,14 +292,14 @@ def seite_immobilien():
     # ── Formular: neue Immobilie hinzufügen ───────────────────────────────────
     st.subheader("Immobilie eintragen")
 
-    # Gleiche Eingabefelder wie Seite 1 (Slider statt number_input)
+    # Eingabefelder wie Seite 1
     col1, col2, col3 = st.columns(3)
     with col1:
         stadt = st.selectbox("Stadt", STADTLISTE, key="immo_stadt")
+        flaeche = st.slider("Wohnfläche (m²)", 25, 300, 80, key="immo_flaeche")
         zimmer = st.select_slider(
             "Anzahl Zimmer", [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0], value=3.0, key="immo_zimmer"
         )
-        flaeche = st.slider("Wohnfläche (m²)", 25, 300, 80, key="immo_flaeche")
     with col2:
         stockwerk = st.slider("Stockwerk", 0, 15, 2, key="immo_stockwerk")
         baujahr = st.slider("Baujahr", 1900, 2026, 2000, key="immo_baujahr")
@@ -310,6 +310,8 @@ def seite_immobilien():
             preis = st.slider("Kaufpreis (CHF)", 200000, 5000000, 800000, step=10000, key="immo_preis_kauf")
         else:
             preis = st.slider("Monatliche Miete (CHF)", 500, 10000, 2000, step=50, key="immo_preis_miete")
+        # Preis mit Apostrophen formatiert anzeigen
+        st.caption(f"Gewählter Preis: **CHF {preis:,.0f}**".replace(",", "'"))
         st.write("")
         speichern = st.button("Eintrag speichern", type="primary", use_container_width=True)
 

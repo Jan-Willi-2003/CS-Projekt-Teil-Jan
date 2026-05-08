@@ -229,8 +229,8 @@ def seite_markt():
         st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in der Datenbank.")
 
         agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
-        # Dynamische Höhe damit Beschriftungen nicht abgeschnitten werden
-        chart_hoehe = max(350, len(agg_sortiert) * 45)
+        # Dynamische Höhe damit alle Balken gut sichtbar sind
+        chart_hoehe = max(380, len(agg_sortiert) * 48)
 
         balken = px.bar(
             agg_sortiert,
@@ -238,17 +238,22 @@ def seite_markt():
             orientation="h",
             color="durchschnitt",
             color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
-            text_auto=",.0f",
             labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
             height=chart_hoehe,
+        )
+        # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
+        balken.update_traces(
+            text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
+            textposition="inside",
+            insidetextanchor="end",
+            textfont={"color": "white", "size": 13},
         )
         balken.update_layout(
             showlegend=False,
             coloraxis_showscale=False,
-            # Genug Platz rechts damit Zahlen nicht abgeschnitten werden
-            margin={"l": 10, "r": 80, "t": 20, "b": 20},
+            margin={"l": 10, "r": 20, "t": 20, "b": 20},
+            xaxis={"tickformat": ",.0f"},
         )
-        balken.update_traces(textposition="outside")
         st.plotly_chart(balken, use_container_width=True)
 
     # ── Scatter Plot: Fläche vs. Preis mit Trendlinie ─────────────────────────

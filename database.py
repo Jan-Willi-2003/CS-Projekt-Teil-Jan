@@ -16,6 +16,15 @@ def initialisieren():
     conn = verbindung()
     c = conn.cursor()
 
+    # Tabelle für Benutzer-Konten (muss zuerst existieren)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS benutzer (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            benutzername TEXT UNIQUE,
+            passwort_hash TEXT
+        )
+    """)
+
     # Tabelle für Immobilien (jetzt mit user_id)
     c.execute("""
         CREATE TABLE IF NOT EXISTS immobilien (
@@ -27,14 +36,11 @@ def initialisieren():
         )
     """)
 
-    # Tabelle für Benutzer-Konten
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS benutzer (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            benutzername TEXT UNIQUE,
-            passwort_hash TEXT
-        )
-    """)
+    # Migration: user_id Spalte nachträglich hinzufügen falls sie noch fehlt
+    # (nötig wenn die Datenbank noch mit der alten Version erstellt wurde)
+    spalten = [row[1] for row in c.execute("PRAGMA table_info(immobilien)").fetchall()]
+    if "user_id" not in spalten:
+        c.execute("ALTER TABLE immobilien ADD COLUMN user_id INTEGER")
 
     # Tabelle für Stadtkoordinaten und Wirtschaftsdaten
     c.execute("""

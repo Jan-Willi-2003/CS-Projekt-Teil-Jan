@@ -43,11 +43,6 @@ def marktdaten_holen(typ):
     # Marktdaten für die Marktübersicht laden
     return database.marktdaten_laden(typ=typ)
 
-@st.cache_data(ttl=3600)
-def snb_daten_holen():
-    # SNB Preisindex laden, maximal 1 Stunde gecacht
-    return data_fetcher.snb_preisindex_holen()
-
 
 # ── Login / Registrierung in der Sidebar ─────────────────────────────────────
 
@@ -210,7 +205,7 @@ def seite_markt():
 
     # ── Karte der Schweiz ─────────────────────────────────────────────────────
     st.subheader("Preiskarte Schweiz")
-    st.caption("Die Karte zeigt den durchschnittlichen Immobilienpreis pro Stadt. Dunklere Farben bedeuten höhere Preise.")
+    st.caption("Die Karte zeigt den durchschnittlichen Immobilienpreis pro Stadt. Farben im roten Bereich bedeuten höhere Preise.")
     agg_karte = agg.copy()
     agg_karte["groesse"] = 10
     karte = px.scatter_mapbox(
@@ -228,38 +223,36 @@ def seite_markt():
     st.plotly_chart(karte, use_container_width=True)
 
     # ── Balkendiagramm: Städtevergleich ──────────────────────────────────────
-    col_l, col_m, col_r = st.columns([1, 3, 1])
-    with col_m:
-        st.subheader("Durchschnittspreise nach Stadt")
-        st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in der Datenbank.")
+    st.subheader("Durchschnittspreise nach Stadt")
+    st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in unserer Datenbank.")
 
-        agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
-        # Dynamische Höhe damit alle Balken gut sichtbar sind
-        chart_hoehe = max(380, len(agg_sortiert) * 48)
+    agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
+    # Dynamische Höhe damit alle Balken gut sichtbar sind
+    chart_hoehe = max(380, len(agg_sortiert) * 48)
 
-        balken = px.bar(
-            agg_sortiert,
-            x="durchschnitt", y="stadt",
-            orientation="h",
-            color="durchschnitt",
-            color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
-            labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
-            height=chart_hoehe,
-        )
-        # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
-        balken.update_traces(
-            text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
-            textposition="inside",
-            insidetextanchor="end",
-            textfont={"color": "white", "size": 13},
-        )
-        balken.update_layout(
-            showlegend=False,
-            coloraxis_showscale=False,
-            margin={"l": 10, "r": 20, "t": 20, "b": 20},
-            xaxis={"tickformat": ",.0f"},
-        )
-        st.plotly_chart(balken, use_container_width=True)
+    balken = px.bar(
+        agg_sortiert,
+        x="durchschnitt", y="stadt",
+        orientation="h",
+        color="durchschnitt",
+        color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
+        labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
+        height=chart_hoehe,
+    )
+    # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
+    balken.update_traces(
+        text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
+        textposition="inside",
+        insidetextanchor="end",
+        textfont={"color": "white", "size": 13},
+    )
+    balken.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        margin={"l": 10, "r": 20, "t": 20, "b": 20},
+        xaxis={"tickformat": ",.0f"},
+    )
+    st.plotly_chart(balken, use_container_width=True)
 
     # ── Scatter Plot: Fläche vs. Preis mit Trendlinie ─────────────────────────
     st.subheader("Wohnfläche vs. Preis")
@@ -283,22 +276,6 @@ def seite_markt():
     scatter.update_layout(legend={"font": {"size": 12}})
     st.plotly_chart(scatter, use_container_width=True)
 
-    # ── SNB Preisentwicklung ──────────────────────────────────────────────────
-    st.subheader("Preisentwicklung Schweiz (SNB-Index)")
-    st.caption("Offizieller Immobilienpreisindex der Schweizerischen Nationalbank – quartalsweise Daten für Eigentumswohnungen (EWG) und Einfamilienhäuser (EFH).")
-
-    snb_df = snb_daten_holen()
-    if snb_df.empty:
-        st.info("SNB-Daten momentan nicht verfügbar.")
-    else:
-        linie = px.line(
-            snb_df, x="datum", y="index", color="kategorie",
-            labels={"datum": "Quartal", "index": "Preisindex", "kategorie": "Kategorie"},
-        )
-        linie.update_layout(legend={"font": {"size": 12}}, xaxis_tickangle=-45)
-        st.plotly_chart(linie, use_container_width=True)
-        st.caption("Quelle: Schweizerische Nationalbank, data.snb.ch")
-
 
 # ── Seite 3: Meine Immobilien ─────────────────────────────────────────────────
 
@@ -315,25 +292,25 @@ def seite_immobilien():
     # ── Formular: neue Immobilie hinzufügen ───────────────────────────────────
     st.subheader("Immobilie eintragen")
 
-    # Gleiche Eingabefelder wie Seite 1 (Slider statt number_input)
+    # Eingabefelder
     col1, col2, col3 = st.columns(3)
     with col1:
         stadt = st.selectbox("Stadt", STADTLISTE, key="immo_stadt")
+        typ_eingabe = st.radio("Preistyp", ["Kaufpreis", "Mietpreis"], key="immo_typ")
+        parkplatz = st.checkbox("Parkplatz vorhanden", key="immo_parkplatz")
+    with col2:
         zimmer = st.select_slider(
             "Anzahl Zimmer", [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0], value=3.0, key="immo_zimmer"
         )
-        flaeche = st.slider("Wohnfläche (m²)", 25, 300, 80, key="immo_flaeche")
-    with col2:
         stockwerk = st.slider("Stockwerk", 0, 15, 2, key="immo_stockwerk")
-        baujahr = st.slider("Baujahr", 1900, 2026, 2000, key="immo_baujahr")
-        parkplatz = st.checkbox("Parkplatz vorhanden", key="immo_parkplatz")
+        flaeche = st.slider("Wohnfläche (m²)", 25, 300, 80, key="immo_flaeche")
     with col3:
-        typ_eingabe = st.radio("Preistyp", ["Kaufpreis", "Mietpreis"], key="immo_typ")
+        baujahr = st.slider("Baujahr", 1900, 2026, 2000, key="immo_baujahr")
         if typ_eingabe == "Kaufpreis":
             preis = st.slider("Kaufpreis (CHF)", 200000, 5000000, 800000, step=10000, key="immo_preis_kauf")
         else:
             preis = st.slider("Monatliche Miete (CHF)", 500, 10000, 2000, step=50, key="immo_preis_miete")
-        st.write("")
+        st.caption(f"Gewählter Preis: **CHF {preis:,.0f}**".replace(",", "'"))
         speichern = st.button("Eintrag speichern", type="primary", use_container_width=True)
 
     if speichern:

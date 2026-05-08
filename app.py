@@ -43,6 +43,11 @@ def marktdaten_holen(typ):
     # Marktdaten für die Marktübersicht laden
     return database.marktdaten_laden(typ=typ)
 
+@st.cache_data(ttl=3600)
+def snb_daten_holen():
+    # SNB Preisindex laden, maximal 1 Stunde gecacht
+    return data_fetcher.snb_preisindex_holen()
+
 
 # ── Login / Registrierung in der Sidebar ─────────────────────────────────────
 
@@ -275,6 +280,20 @@ def seite_markt():
         ))
     scatter.update_layout(legend={"font": {"size": 12}})
     st.plotly_chart(scatter, use_container_width=True)
+
+    # ── SNB Preisentwicklung ──────────────────────────────────────────────────
+    st.subheader("Preisentwicklung Schweiz (SNB-Index)")
+    st.caption("Offizieller Immobilienpreisindex der Schweizerischen Nationalbank – Entwicklung seit 2000 (Basisjahr = 100).")
+
+    snb_df = snb_daten_holen()
+    linie = px.line(
+        snb_df, x="datum", y="index", color="kategorie",
+        labels={"datum": "Jahr", "index": "Preisindex (2000 = 100)", "kategorie": "Immobilientyp"},
+        color_discrete_map={"Eigentumswohnungen": "#1a7a4a", "Einfamilienhäuser": "#d62828"},
+    )
+    linie.update_layout(legend={"font": {"size": 12}}, xaxis_tickangle=-45)
+    st.plotly_chart(linie, use_container_width=True)
+    st.caption("Quelle: Schweizerische Nationalbank (SNB), data.snb.ch · Preisindex Wohnimmobilien Schweiz")
 
 
 # ── Seite 3: Meine Immobilien ─────────────────────────────────────────────────

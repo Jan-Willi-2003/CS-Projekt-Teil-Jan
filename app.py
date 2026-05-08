@@ -226,7 +226,7 @@ def seite_markt():
     col_l, col_m, col_r = st.columns([1, 3, 1])
     with col_m:
         st.subheader("Durchschnittspreise nach Stadt")
-        st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in der Datenbank.")
+        st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in unserer Datenbank.")
 
         agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
         # Dynamische Höhe damit alle Balken gut sichtbar sind

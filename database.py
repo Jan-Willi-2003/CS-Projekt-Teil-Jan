@@ -1,5 +1,6 @@
 # Datenbank-Verwaltung mit SQLite für WertWohn
 import sqlite3
+import hashlib
 import random
 import pandas as pd
 from config import STAEDTE
@@ -15,13 +16,23 @@ def initialisieren():
     conn = verbindung()
     c = conn.cursor()
 
-    # Tabelle für Immobilien
+    # Tabelle für Immobilien (jetzt mit user_id)
     c.execute("""
         CREATE TABLE IF NOT EXISTS immobilien (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             stadt TEXT, kanton TEXT, flaeche REAL, zimmer REAL,
             stockwerk INTEGER, parkplatz INTEGER, baujahr INTEGER,
             preis REAL, typ TEXT
+        )
+    """)
+
+    # Tabelle für Benutzer-Konten
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS benutzer (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            benutzername TEXT UNIQUE,
+            passwort_hash TEXT
         )
     """)
 
@@ -53,18 +64,47 @@ def initialisieren():
     """)
     conn.commit()
 
-    # Immobilien Tabelle leeren
-    c.execute("DELETE FROM immobilien")
-    conn.commit()
-
     # Marktdaten erstellen falls leer
     if c.execute("SELECT COUNT(*) FROM marktdaten").fetchone()[0] == 0:
         _beispieldaten_erstellen(conn)
     conn.close()
 
 
+# ── Benutzer-Login Funktionen ─────────────────────────────────────────────────
 
-# Basis-Kaufpreise und Mietpreise pro Stadt (synthetische Marktdaten)
+def passwort_hashen(passwort):
+    # Passwort mit SHA-256 verschlüsseln (sicherer als Klartext)
+    return hashlib.sha256(passwort.encode()).hexdigest()
+
+def benutzer_registrieren(benutzername, passwort):
+    # Neuen Benutzer anlegen, gibt True zurück wenn erfolgreich
+    conn = verbindung()
+    try:
+        conn.execute(
+            "INSERT INTO benutzer (benutzername, passwort_hash) VALUES (?, ?)",
+            (benutzername.strip(), passwort_hashen(passwort))
+        )
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        # Benutzername bereits vergeben
+        conn.close()
+        return False
+
+def benutzer_anmelden(benutzername, passwort):
+    # Anmeldung prüfen, gibt user_id zurück oder None
+    conn = verbindung()
+    ergebnis = conn.execute(
+        "SELECT id FROM benutzer WHERE benutzername=? AND passwort_hash=?",
+        (benutzername.strip(), passwort_hashen(passwort))
+    ).fetchone()
+    conn.close()
+    return ergebnis[0] if ergebnis else None
+
+
+# ── Basis-Kaufpreise und Mietpreise pro Stadt (synthetische Marktdaten) ───────
+
 _KAUF = {
     "Zürich": 1200000, "Genf": 1100000, "Zug": 1350000, "Basel": 920000,
     "Lausanne": 960000, "Bern": 850000, "Winterthur": 780000, "Luzern": 810000,
@@ -95,18 +135,25 @@ def _beispieldaten_erstellen(conn):
             c.execute("INSERT INTO marktdaten VALUES (NULL,?,?,?,?,?,?,?,?,?)",
                       (stadt, info["kanton"], f, z, s, p, b, round(k, -3), "kauf"))
 
-            # Mietpreis: analog berechnet
+            # Mietpreis: analog berechnet, aber deutlich niedrigere Zahlen
             m = _MIETE[stadt] * (f / 80) * (z / 3.5) * (1 - alter * 0.001) * (1 + p * 0.06)
             m *= random.uniform(0.9, 1.1)
             c.execute("INSERT INTO marktdaten VALUES (NULL,?,?,?,?,?,?,?,?,?)",
                       (stadt, info["kanton"], f, z, s, p, b, round(m, -1), "miete"))
     conn.commit()
 
-def laden(typ=None):
-    # Immobilien aus der Datenbank laden, optional nach Typ filtern
+
+# ── Daten laden und speichern ─────────────────────────────────────────────────
+
+def laden(typ=None, user_id=None):
+    # Immobilien aus der Datenbank laden, optional nach Typ und Benutzer filtern
     conn = verbindung()
-    if typ:
+    if typ and user_id is not None:
+        df = pd.read_sql("SELECT * FROM immobilien WHERE typ=? AND user_id=?", conn, params=(typ, user_id))
+    elif typ:
         df = pd.read_sql("SELECT * FROM immobilien WHERE typ=?", conn, params=(typ,))
+    elif user_id is not None:
+        df = pd.read_sql("SELECT * FROM immobilien WHERE user_id=?", conn, params=(user_id,))
     else:
         df = pd.read_sql("SELECT * FROM immobilien", conn)
     conn.close()
@@ -129,17 +176,15 @@ def marktdaten_laden(typ=None):
     conn.close()
     return df
 
-def einfuegen(stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ):
-    # Neue Immobilie in die Datenbank schreiben
+def einfuegen(user_id, stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ):
+    # Neue Immobilie in die Datenbank schreiben (mit Benutzer-Zuordnung)
     conn = verbindung()
     kanton = STAEDTE.get(stadt, {}).get("kanton", "")
     conn.execute(
         """INSERT INTO immobilien
-           (stadt, kanton, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ)
-           VALUES (?,?,?,?,?,?,?,?,?)""",
-        (stadt, kanton, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ),
+           (user_id, stadt, kanton, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ)
+           VALUES (?,?,?,?,?,?,?,?,?,?)""",
+        (user_id, stadt, kanton, flaeche, zimmer, stockwerk, parkplatz, baujahr, preis, typ),
     )
     conn.commit()
     conn.close()
-
-

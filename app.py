@@ -223,38 +223,36 @@ def seite_markt():
     st.plotly_chart(karte, use_container_width=True)
 
     # ── Balkendiagramm: Städtevergleich ──────────────────────────────────────
-    col_l, col_m, col_r = st.columns([1, 3, 1])
-    with col_m:
-        st.subheader("Durchschnittspreise nach Stadt")
-        st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in unserer Datenbank.")
+    st.subheader("Durchschnittspreise nach Stadt")
+    st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in unserer Datenbank.")
 
-        agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
-        # Dynamische Höhe damit alle Balken gut sichtbar sind
-        chart_hoehe = max(380, len(agg_sortiert) * 48)
+    agg_sortiert = agg.sort_values("durchschnitt", ascending=True)
+    # Dynamische Höhe damit alle Balken gut sichtbar sind
+    chart_hoehe = max(380, len(agg_sortiert) * 48)
 
-        balken = px.bar(
-            agg_sortiert,
-            x="durchschnitt", y="stadt",
-            orientation="h",
-            color="durchschnitt",
-            color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
-            labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
-            height=chart_hoehe,
-        )
-        # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
-        balken.update_traces(
-            text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
-            textposition="inside",
-            insidetextanchor="end",
-            textfont={"color": "white", "size": 13},
-        )
-        balken.update_layout(
-            showlegend=False,
-            coloraxis_showscale=False,
-            margin={"l": 10, "r": 20, "t": 20, "b": 20},
-            xaxis={"tickformat": ",.0f"},
-        )
-        st.plotly_chart(balken, use_container_width=True)
+    balken = px.bar(
+        agg_sortiert,
+        x="durchschnitt", y="stadt",
+        orientation="h",
+        color="durchschnitt",
+        color_continuous_scale=[[0, "#1a7a4a"], [0.5, "#f4a261"], [1, "#d62828"]],
+        labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
+        height=chart_hoehe,
+    )
+    # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
+    balken.update_traces(
+        text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
+        textposition="inside",
+        insidetextanchor="end",
+        textfont={"color": "white", "size": 13},
+    )
+    balken.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        margin={"l": 10, "r": 20, "t": 20, "b": 20},
+        xaxis={"tickformat": ",.0f"},
+    )
+    st.plotly_chart(balken, use_container_width=True)
 
     # ── Scatter Plot: Fläche vs. Preis mit Trendlinie ─────────────────────────
     st.subheader("Wohnfläche vs. Preis")

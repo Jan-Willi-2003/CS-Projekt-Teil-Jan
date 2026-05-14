@@ -6,7 +6,7 @@
 # Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# Datenbank-Verwaltung mit SQLite für WertWohn
+# Verwaltung der Datenbank mit SQLite
 import sqlite3
 import hashlib
 import random
@@ -44,8 +44,7 @@ def initialisieren():
         )
     """)
 
-    # Migration: user_id Spalte nachträglich hinzufügen falls sie noch fehlt
-    # (nötig wenn die Datenbank noch mit der alten Version erstellt wurde)
+    # Migration: user_id Spalte nachträglich hinzufügen falls sie noch fehlt (nötig wenn die Datenbank noch mit der alten Version erstellt wurde)
     spalten = [row[1] for row in c.execute("PRAGMA table_info(immobilien)").fetchall()]
     if "user_id" not in spalten:
         c.execute("ALTER TABLE immobilien ADD COLUMN user_id INTEGER")
@@ -85,10 +84,10 @@ def initialisieren():
 
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# ── Benutzer-Login Funktionen ─────────────────────────────────────────────────
+# Benutzer-Login Funktionen
 
 def passwort_hashen(passwort):
-    # Passwort mit SHA-256 verschlüsseln (sicherer als Klartext)
+    # Passwort verschlüsseln
     return hashlib.sha256(passwort.encode()).hexdigest()
 
 def benutzer_registrieren(benutzername, passwort):
@@ -119,7 +118,7 @@ def benutzer_anmelden(benutzername, passwort):
 
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# ── Basis-Kaufpreise und Mietpreise pro Stadt (synthetische Marktdaten) ───────
+# Basis Kaufpreise und Mietpreise pro Stadt (synthetische Marktdaten)
 
 _KAUF = {
     "Zürich": 1200000, "Genf": 1100000, "Zug": 1350000, "Basel": 920000,
@@ -133,7 +132,7 @@ _MIETE = {
 }
 
 def _beispieldaten_erstellen(conn):
-    # Synthetische aber realistische Immobiliendaten für alle Städte generieren
+    # Synthetische Immobiliendaten für alle Städte generieren
     random.seed(42)
     c = conn.cursor()
     for stadt, info in STAEDTE.items():
@@ -151,7 +150,7 @@ def _beispieldaten_erstellen(conn):
             c.execute("INSERT INTO marktdaten VALUES (NULL,?,?,?,?,?,?,?,?,?)",
                       (stadt, info["kanton"], f, z, s, p, b, round(k, -3), "kauf"))
 
-            # Mietpreis: analog berechnet, aber deutlich niedrigere Zahlen
+            # Mietpreis: analog berechnet
             m = _MIETE[stadt] * (f / 80) * (z / 3.5) * (1 - alter * 0.001) * (1 + p * 0.06)
             m *= random.uniform(0.9, 1.1)
             c.execute("INSERT INTO marktdaten VALUES (NULL,?,?,?,?,?,?,?,?,?)",
@@ -160,7 +159,7 @@ def _beispieldaten_erstellen(conn):
 
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# ── Daten laden und speichern ─────────────────────────────────────────────────
+# Daten laden und speichern
 
 def laden(typ=None, user_id=None):
     # Immobilien aus der Datenbank laden, optional nach Typ und Benutzer filtern

@@ -13,6 +13,8 @@ from io import StringIO
 def wechselkurs_holen():
     # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Aktuellen Wechselkurs von frankfurter.app API laden
+    # Quelle Frankfurter API: lineofflight (2024). Frankfurter – Currency Data API [Open-Source-Software]. GitHub.
+    # https://github.com/lineofflight/frankfurter
     try:
         antwort = requests.get(
             "https://api.frankfurter.app/latest",
@@ -30,6 +32,8 @@ def snb_preisindex_holen():
     # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Echte SNB-Daten: Immobilienpreisindex Schweiz (Quelle: data.snb.ch)
     # Daten der API – falls nicht erreichbar, nehmen wir die eingebetteten Referenzwerte (echte SNB-Zahlen, manuell hinterlegt)
+    # Quelle SNB Immobilienpreisindex: Schweizerische Nationalbank (2024). Immobilienpreisindizes – Gesamte Schweiz – Quartal [Datensatz, Cube: plimoinchq]. Datenportal der SNB.
+    # https://data.snb.ch/de/topics/uvo/cube/plimoinchq
     try:
         antwort = requests.get(
             "https://data.snb.ch/api/cube/plimoinchq/data/csv/en",

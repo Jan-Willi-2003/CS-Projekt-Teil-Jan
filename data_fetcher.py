@@ -11,6 +11,7 @@ import pandas as pd
 from io import StringIO
 
 def wechselkurs_holen():
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Aktuellen Wechselkurs von frankfurter.app API laden
     try:
         antwort = requests.get(
@@ -26,9 +27,9 @@ def wechselkurs_holen():
         return 1.02, 1.10
 
 def snb_preisindex_holen():
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Echte SNB-Daten: Immobilienpreisindex Schweiz (Quelle: data.snb.ch)
-    # Wir versuchen zuerst die API – falls nicht erreichbar, nehmen wir
-    # die eingebetteten Referenzwerte (echte SNB-Zahlen, manuell hinterlegt)
+    # Daten der API – falls nicht erreichbar, nehmen wir die eingebetteten Referenzwerte (echte SNB-Zahlen, manuell hinterlegt)
     try:
         antwort = requests.get(
             "https://data.snb.ch/api/cube/plimoinchq/data/csv/en",
@@ -37,7 +38,7 @@ def snb_preisindex_holen():
         if antwort.status_code != 200:
             raise Exception("API nicht erreichbar")
 
-        # SNB-CSV hat Metadaten am Anfang – wir suchen die Datenzeilen
+        # Nur die relevanten Datenzeilen aus der CSV übernehmen
         zeilen = antwort.text.splitlines()
         daten_start = next(i for i, z in enumerate(zeilen) if z.startswith("20"))
         csv_text = "\n".join(zeilen[daten_start:])
@@ -47,7 +48,7 @@ def snb_preisindex_holen():
         return df
 
     except Exception:
-        # Fallback: echte SNB-Referenzwerte (Eigentumswohnungen, jährlich)
+        # Falls die SNB-Daten nicht geladen werden können
         # Quelle: Schweizerische Nationalbank, data.snb.ch, plimoinchq
         referenzwerte = [
             ("2000-Q1", "Eigentumswohnungen", 100.0),

@@ -14,13 +14,13 @@ from sklearn.preprocessing import LabelEncoder
 import database
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# Globale Speicherung: Modelle und Encoder bleiben nach dem Training erhalten
+# Speicherung der Modelle nach dem Training
 _modelle = {}
 _encoder = None
 
 def _encoder_initialisieren(daten):
     # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-    # LabelEncoder für Stadtnamen einmalig aufsetzen
+    # Encoder für Stadtnamen
     global _encoder
     if _encoder is None:
         _encoder = LabelEncoder()
@@ -28,7 +28,7 @@ def _encoder_initialisieren(daten):
 
 def _features_erstellen(daten):
     # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-    # Eingabevektoren für das Modell aus den Rohdaten aufbauen
+    # Erstellung der Eingabedaten für das Modell
     _encoder_initialisieren(daten)
     df = daten.copy()
     df["stadt_nr"] = _encoder.transform(df["stadt"].values)
@@ -60,7 +60,7 @@ def schaetzen(stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, typ):
     if typ not in _modelle:
         trainieren(typ)
     if typ not in _modelle:
-        # Einfacher Fallback falls kein Modell vorhanden
+        # Alternative falls kein Modell vorhanden
         return round(flaeche * (8000 if typ == "kauf" else 20), -2)
     try:
         # Unbekannte Städte werden auf den ersten bekannten Wert abgebildet

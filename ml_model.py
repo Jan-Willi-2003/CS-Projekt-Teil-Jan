@@ -1,3 +1,11 @@
+# Diese Datei wurde im Rahmen eines iterativen Entwicklungsprozesses unter
+# Zuhilfenahme des KI-Sprachmodells Claude (Anthropic, 2025) erstellt.
+# Der Prozess umfasste: Erstellung eines initialen Grundgerüsts,
+# schrittweise Weiterentwicklung durch die Gruppe sowie
+# Fehlerbehebung und Anpassungen mittels KI.
+# Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
+
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Machine Learning Modell: Preisschätzung mit Random Forest
 from datetime import datetime
 import numpy as np
@@ -5,11 +13,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 import database
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Globale Speicherung: Modelle und Encoder bleiben nach dem Training erhalten
 _modelle = {}
 _encoder = None
 
 def _encoder_initialisieren(daten):
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # LabelEncoder für Stadtnamen einmalig aufsetzen
     global _encoder
     if _encoder is None:
@@ -17,6 +27,7 @@ def _encoder_initialisieren(daten):
         _encoder.fit(daten["stadt"].unique())
 
 def _features_erstellen(daten):
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Eingabevektoren für das Modell aus den Rohdaten aufbauen
     _encoder_initialisieren(daten)
     df = daten.copy()
@@ -26,6 +37,7 @@ def _features_erstellen(daten):
     return df[["stadt_nr", "flaeche", "zimmer", "stockwerk", "parkplatz", "alter"]]
 
 def trainieren(typ):
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Random Forest für Kauf- oder Mietpreise trainieren und speichern
     global _modelle
     daten = database.marktdaten_laden(typ=typ)
@@ -43,6 +55,7 @@ def alle_trainieren():
     trainieren("miete")
 
 def schaetzen(stadt, flaeche, zimmer, stockwerk, parkplatz, baujahr, typ):
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Preis für eine Immobilie schätzen und als gerundeten CHF-Betrag zurückgeben
     if typ not in _modelle:
         trainieren(typ)

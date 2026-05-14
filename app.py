@@ -1,3 +1,11 @@
+# Diese Datei wurde im Rahmen eines iterativen Entwicklungsprozesses unter
+# Zuhilfenahme des KI-Sprachmodells Claude (Anthropic, 2025) erstellt.
+# Der Prozess umfasste: Erstellung eines initialen Grundgerüsts,
+# schrittweise Weiterentwicklung durch die Gruppe sowie
+# Fehlerbehebung und Anpassungen mittels KI.
+# Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
+
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # WertWohn – Schweizer Immobilienpreisschätzer (Hauptdatei)
 import numpy as np
 import streamlit as st
@@ -11,9 +19,11 @@ import data_fetcher
 from config import STAEDTE, STADTLISTE, SEITEN, APP_NAME, APP_UNTERTITEL
 from utils import chf, typ_bezeichnung, suche_stadt
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Seiteneinstellungen ───────────────────────────────────────────────────────
 st.set_page_config(page_title=APP_NAME, page_icon="🏠", layout="wide")
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Initialisierung beim ersten Start ─────────────────────────────────────────
 
 if "gestartet" not in st.session_state:
@@ -22,12 +32,14 @@ if "gestartet" not in st.session_state:
     st.session_state["gestartet"] = True
     st.cache_data.clear()
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Login-Status initialisieren
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 if "benutzername" not in st.session_state:
     st.session_state["benutzername"] = None
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Daten mit Cache laden ─────────────────────────────────────────────────────
 
 @st.cache_data
@@ -49,6 +61,7 @@ def snb_daten_holen():
     return data_fetcher.snb_preisindex_holen()
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Login / Registrierung in der Sidebar ─────────────────────────────────────
 
 def sidebar_login():
@@ -62,6 +75,7 @@ def sidebar_login():
             st.rerun()
         return
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Login-Formular anzeigen
     modus = st.sidebar.radio("Konto", ["Anmelden", "Registrieren"], horizontal=True)
     benutzername = st.sidebar.text_input("Benutzername", key="login_name")
@@ -90,6 +104,7 @@ def sidebar_login():
                     st.sidebar.error("Benutzername bereits vergeben.")
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Seite 1: Preisschätzung ───────────────────────────────────────────────────
 
 def seite_preisschaetzung():
@@ -110,6 +125,7 @@ Preisschätzung – für Kauf und Miete, kostenlos und mit persönlichem Konto.
 
     st.markdown("---")
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Suche und Preistyp ────────────────────────────────────────────────────
     col_suche, col_typ = st.columns([2, 1])
     with col_suche:
@@ -117,6 +133,7 @@ Preisschätzung – für Kauf und Miete, kostenlos und mit persönlichem Konto.
     with col_typ:
         typ_wahl = st.radio("Preistyp", ["Kaufpreis", "Mietpreis"], horizontal=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Stadtauswahl: Sucheingabe vorfiltern, dann Dropdown
     gefundene_stadt = suche_stadt(eingabe, STADTLISTE) if eingabe else None
     if eingabe and not gefundene_stadt:
@@ -125,6 +142,7 @@ Preisschätzung – für Kauf und Miete, kostenlos und mit persönlichem Konto.
     standard_index = STADTLISTE.index(gefundene_stadt) if gefundene_stadt else 0
     stadt = st.selectbox("Stadt", STADTLISTE, index=standard_index)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Immobilien-Eigenschaften ──────────────────────────────────────────────
     st.markdown("#### Angaben zur Immobilie")
     col_a, col_b, col_c = st.columns(3)
@@ -142,6 +160,7 @@ Preisschätzung – für Kauf und Miete, kostenlos und mit persönlichem Konto.
         st.write("")
         berechnen = st.button("Preis schätzen", type="primary", use_container_width=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Ergebnis anzeigen ─────────────────────────────────────────────────────
     typ_intern = "kauf" if typ_wahl == "Kaufpreis" else "miete"
 
@@ -189,6 +208,7 @@ Preisschätzung – für Kauf und Miete, kostenlos und mit persönlichem Konto.
         st.info("Bitte Angaben eingeben und auf 'Preis schätzen' klicken.")
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Seite 2: Marktübersicht ───────────────────────────────────────────────────
 
 def seite_markt():
@@ -201,6 +221,7 @@ def seite_markt():
     daten = marktdaten_holen(typ_intern)
     stadtdaten = stadtdaten_holen()
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Stadtdurchschnitte für Karte und Balkendiagramm berechnen
     agg = (
         daten.groupby("stadt", as_index=False)
@@ -208,6 +229,7 @@ def seite_markt():
         .merge(stadtdaten[["stadt", "lat", "lon", "kanton"]], on="stadt", how="left")
     )
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Karte der Schweiz ─────────────────────────────────────────────────────
     st.subheader("Preiskarte Schweiz")
     st.caption("Die Karte zeigt den durchschnittlichen Immobilienpreis pro Stadt. Farben im roten Bereich bedeuten höhere Preise.")
@@ -227,6 +249,7 @@ def seite_markt():
     karte.update_layout(mapbox_style="open-street-map", margin={"l": 0, "r": 0, "t": 0, "b": 0})
     st.plotly_chart(karte, use_container_width=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Balkendiagramm: Städtevergleich ──────────────────────────────────────
     st.subheader("Durchschnittspreise nach Stadt")
     st.caption("Vergleich der durchschnittlichen Preise aller Schweizer Städte in unserer Datenbank.")
@@ -244,6 +267,7 @@ def seite_markt():
         labels={"durchschnitt": f"Ø Preis ({einheit})", "stadt": "Stadt"},
         height=chart_hoehe,
     )
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Zahlen innerhalb der Balken anzeigen – kein Abschneiden am Rand
     balken.update_traces(
         text=agg_sortiert["durchschnitt"].apply(lambda x: f"{x:,.0f}"),
@@ -259,6 +283,7 @@ def seite_markt():
     )
     st.plotly_chart(balken, use_container_width=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Scatter Plot: Fläche vs. Preis mit Trendlinie ─────────────────────────
     st.subheader("Wohnfläche vs. Preis")
     st.caption("Jeder Punkt steht für ein Inserat. Die gestrichelte Linie zeigt den allgemeinen Trend: grössere Wohnungen kosten mehr.")
@@ -281,6 +306,7 @@ def seite_markt():
     scatter.update_layout(legend={"font": {"size": 12}})
     st.plotly_chart(scatter, use_container_width=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── SNB Preisentwicklung ──────────────────────────────────────────────────
     st.subheader("Preisentwicklung Schweiz (SNB-Index)")
     st.caption(
@@ -303,11 +329,13 @@ def seite_markt():
     st.caption("Quelle: Schweizerische Nationalbank (SNB), data.snb.ch · Preisindex Wohnimmobilien Schweiz")
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Seite 3: Meine Immobilien ─────────────────────────────────────────────────
 
 def seite_immobilien():
     st.header("Meine Immobilien")
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Login prüfen
     if st.session_state["user_id"] is None:
         st.info("👤 Bitte melde dich links in der Seitenleiste an, um deine Immobilien zu verwalten.")
@@ -315,9 +343,11 @@ def seite_immobilien():
 
     user_id = st.session_state["user_id"]
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Formular: neue Immobilie hinzufügen ───────────────────────────────────
     st.subheader("Immobilie eintragen")
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Eingabefelder
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -344,6 +374,7 @@ def seite_immobilien():
         database.einfuegen(user_id, stadt, flaeche, zimmer, stockwerk, int(parkplatz), baujahr, preis, typ_intern)
         st.success("Immobilie wurde gespeichert.")
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # ── Liste: gespeicherte Immobilien ────────────────────────────────────────
     st.markdown("---")
     st.subheader("Gespeicherte Einträge")
@@ -360,6 +391,7 @@ def seite_immobilien():
         st.info("Noch keine Immobilien gespeichert. Trage oben deine erste ein!")
         return
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Spalten auf Deutsch umbenennen für die Anzeige
     anzeige = anzeige_daten.rename(columns={
         "stadt": "Stadt", "kanton": "Kanton", "flaeche": "Fläche (m²)",
@@ -372,6 +404,7 @@ def seite_immobilien():
 
     st.dataframe(anzeige, use_container_width=True, hide_index=True)
 
+    # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
     # Lösch-Buttons pro Zeile
     st.markdown("---")
     for nr, (_, zeile) in enumerate(anzeige_daten.iterrows(), start=1):
@@ -387,6 +420,7 @@ def seite_immobilien():
                 st.rerun()
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Navigation ────────────────────────────────────────────────────────────────
 
 st.sidebar.title(APP_NAME)
@@ -394,6 +428,7 @@ st.sidebar.caption(APP_UNTERTITEL)
 st.sidebar.markdown("---")
 seite = st.sidebar.radio("Navigation", SEITEN, label_visibility="collapsed")
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Login-Bereich in der Sidebar anzeigen
 sidebar_login()
 

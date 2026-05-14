@@ -248,6 +248,8 @@ def seite_markt():
         labels={"durchschnitt": f"Ø {einheit}", "anzahl": "Inserate"},
     )
     karte.update_layout(mapbox_style="open-street-map", margin={"l": 0, "r": 0, "t": 0, "b": 0})
+    # Quelle der Karte: OpenStreetMap contributors (2004). OpenStreetMap [Geodatenbankprojekt, lizenziert unter ODbL]. OpenStreetMap Foundation.
+    # https://www.openstreetmap.org/copyright
     st.plotly_chart(karte, use_container_width=True)
 
     # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).

@@ -6,7 +6,7 @@
 # Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
 
 # Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
-# WertWohn – Schweizer Immobilienpreisschätzer (Hauptdatei)
+# WertWohn - Hauptdatei 
 import numpy as np
 import streamlit as st
 import pandas as pd

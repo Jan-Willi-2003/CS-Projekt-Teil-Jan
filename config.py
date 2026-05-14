@@ -10,7 +10,7 @@
 APP_NAME = "WertWohn"
 APP_UNTERTITEL = "Schweizer Immobilienpreisschätzer für Kauf & Miete"
 
-# Schweizer Städte mit PLZ, Geokoordinaten, Kanton und Durchschnittseinkommen
+# Schweizer Städte mit PLZ, Koordinaten, Kanton und Durchschnittseinkommen
 STAEDTE = {
     "Zürich":            {"plz": "8000", "lat": 47.377, "lon": 8.542,  "kanton": "ZH", "einkommen": 95000},
     "Bern":              {"plz": "3000", "lat": 46.948, "lon": 7.447,  "kanton": "BE", "einkommen": 78000},
@@ -24,7 +24,7 @@ STAEDTE = {
     "Lugano":            {"plz": "6900", "lat": 46.004, "lon": 8.951,  "kanton": "TI", "einkommen": 70000},
 }
 
-# Alphabetisch sortierte Stadtliste für Dropdowns
+# Alphabetisch sortierte Stadtliste
 STADTLISTE = sorted(STAEDTE.keys())
 
 # Navigationsseiten der App

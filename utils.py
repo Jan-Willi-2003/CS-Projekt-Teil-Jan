@@ -5,15 +5,15 @@
 # Fehlerbehebung und Anpassungen mittels KI.
 # Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
 
-# Hilfsfunktionen für WertWohn
+# Hilfsfunktionen
 from config import STAEDTE
 
 def chf(betrag):
-    # Betrag als CHF-String mit Tausendertrennzeichen formatieren
+    # Betrag als CHF und mit Tausendertrennzeichen formatieren
     return "CHF {:,.0f}".format(betrag).replace(",", "'")
 
 def typ_bezeichnung(typ):
-    # Internen Typ in lesbaren Text umwandeln
+    # Typ in lesbaren Text umwandeln
     if typ == "kauf":
         return "Kaufpreis"
     return "Monatliche Miete"

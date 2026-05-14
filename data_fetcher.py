@@ -1,3 +1,11 @@
+# Diese Datei wurde im Rahmen eines iterativen Entwicklungsprozesses unter
+# Zuhilfenahme des KI-Sprachmodells Claude (Anthropic, 2025) erstellt.
+# Der Prozess umfasste: Erstellung eines initialen Grundgerüsts,
+# schrittweise Weiterentwicklung durch die Gruppe sowie
+# Fehlerbehebung und Anpassungen mittels KI.
+# Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
+
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # API-Funktionen: Wechselkurse und SNB Immobilienpreisindex
 import requests
 import pandas as pd

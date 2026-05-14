@@ -1,8 +1,17 @@
+# Diese Datei wurde im Rahmen eines iterativen Entwicklungsprozesses unter
+# Zuhilfenahme des KI-Sprachmodells Claude (Anthropic, 2025) erstellt.
+# Der Prozess umfasste: Erstellung eines initialen Grundgerüsts,
+# schrittweise Weiterentwicklung durch die Gruppe sowie
+# Fehlerbehebung und Anpassungen mittels KI.
+# Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
+
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Konfiguration: Städtenamen, PLZ, Koordinaten und Wirtschaftsdaten
 
 APP_NAME = "WertWohn"
 APP_UNTERTITEL = "Schweizer Immobilienpreisschätzer für Kauf & Miete"
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Schweizer Städte mit PLZ, Geokoordinaten, Kanton und Durchschnittseinkommen
 STAEDTE = {
     "Zürich":            {"plz": "8000", "lat": 47.377, "lon": 8.542,  "kanton": "ZH", "einkommen": 95000},
@@ -17,8 +26,10 @@ STAEDTE = {
     "Lugano":            {"plz": "6900", "lat": 46.004, "lon": 8.951,  "kanton": "TI", "einkommen": 70000},
 }
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Alphabetisch sortierte Stadtliste für Dropdowns
 STADTLISTE = sorted(STAEDTE.keys())
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Navigationsseiten der App
 SEITEN = ["🏠 Preisschätzung", "📊 Marktübersicht", "📋 Meine Immobilien"]

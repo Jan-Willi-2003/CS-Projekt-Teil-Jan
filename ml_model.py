@@ -46,8 +46,6 @@ def trainieren(typ):
     X = _features_erstellen(daten)
     y = daten["preis"].values
     modell = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
-    # Quelle Random Forest: Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5–32.
-    # https://doi.org/10.1023/A:1010933404324
     modell.fit(X, y)
     _modelle[typ] = modell
 

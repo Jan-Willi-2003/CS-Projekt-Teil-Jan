@@ -1,3 +1,11 @@
+# Diese Datei wurde im Rahmen eines iterativen Entwicklungsprozesses unter
+# Zuhilfenahme des KI-Sprachmodells Claude (Anthropic, 2025) erstellt.
+# Der Prozess umfasste: Erstellung eines initialen Grundgerüsts,
+# schrittweise Weiterentwicklung durch die Gruppe sowie
+# Fehlerbehebung und Anpassungen mittels KI.
+# Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
+
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # Datenbank-Verwaltung mit SQLite für WertWohn
 import sqlite3
 import hashlib
@@ -76,6 +84,7 @@ def initialisieren():
     conn.close()
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Benutzer-Login Funktionen ─────────────────────────────────────────────────
 
 def passwort_hashen(passwort):
@@ -109,6 +118,7 @@ def benutzer_anmelden(benutzername, passwort):
     return ergebnis[0] if ergebnis else None
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Basis-Kaufpreise und Mietpreise pro Stadt (synthetische Marktdaten) ───────
 
 _KAUF = {
@@ -149,6 +159,7 @@ def _beispieldaten_erstellen(conn):
     conn.commit()
 
 
+# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # ── Daten laden und speichern ─────────────────────────────────────────────────
 
 def laden(typ=None, user_id=None):

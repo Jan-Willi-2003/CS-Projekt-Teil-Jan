@@ -5,7 +5,6 @@
 # Fehlerbehebung und Anpassungen mittels KI.
 # Referenz: Anthropic (2025). Claude [KI-Sprachmodell]. https://claude.ai
 
-# Entwickelt unter Zuhilfenahme von Claude (Anthropic, 2025).
 # API-Funktionen: Wechselkurse und SNB Immobilienpreisindex
 import requests
 import pandas as pd
